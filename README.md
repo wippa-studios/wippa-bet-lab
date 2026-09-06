@@ -25,6 +25,16 @@ Most betting tools show you picks. Very few prove that a strategy actually survi
 - A paper trading layer for live testing without capital at risk
 - A **Model Builder** — a spreadsheet-like ML interface that lets non-coders point, click, and train betting models without writing Python
 
+### Dashboard Preview
+
+![Dashboard Overview](docs/screenshots/dashboard-overview.png)
+
+![Column Browser](docs/screenshots/column-browser.png)
+
+![Target & Feature Selection](docs/screenshots/target-selector.png)
+
+![Model Configuration](docs/screenshots/model-panel.png)
+
 ## Features
 
 ### Core Platform
