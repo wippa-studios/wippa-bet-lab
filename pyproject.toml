@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wippa-bet-lab"
+version = "0.1.0"
+description = "Sports betting research platform — backtest, validate, and paper-trade strategies safely"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "wippa-studios"},
+]
+keywords = ["betting", "backtesting", "sports", "betfair", "research"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "pydantic>=2.0",
+    "duckdb>=0.10",
+    "pandas>=2.0",
+    "numpy>=1.26",
+    "scikit-learn>=1.4",
+    "joblib>=1.3",
+    "typer>=0.9",
+    "rich>=13.0",
+    "jinja2>=3.1",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "httpx>=0.27",
+    "plotly>=5.18",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.4",
+    "playwright>=1.40",
+]
+
+[project.scripts]
+betlab = "betlab.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/wippa-studios/wippa-bet-lab"
+Repository = "https://github.com/wippa-studios/wippa-bet-lab"
+
+[tool.setuptools.packages.find]
+include = ["betlab*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

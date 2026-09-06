@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wippa Bet Lab — Model Builder</title>
+<link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="header-left">
+    <span class="logo">wippa</span>
+    <h1>Bet Lab <span class="subtitle">Model Builder</span></h1>
+  </div>
+  <nav class="header-nav">
+    <button class="nav-btn active" data-panel="builder">Builder</button>
+    <button class="nav-btn" data-panel="history">History</button>
+  </nav>
+  <div class="header-right">
+    <span class="status-dot green"></span>
+    <span class="status-text">Connected</span>
+  </div>
+</header>
+
+<main class="dashboard" id="builder-panel">
+  <!-- Dataset Section -->
+  <section class="panel panel-dataset">
+    <div class="panel-header">
+      <h2>Dataset</h2>
+      <button class="btn btn-sm" id="btn-refresh-datasets">Refresh</button>
+    </div>
+    <div class="panel-body">
+      <div class="form-row">
+        <label for="dataset-select">Select Dataset</label>
+        <select id="dataset-select" class="form-control">
+          <option value="">— Choose dataset —</option>
+        </select>
+      </div>
+      <div id="dataset-info" class="dataset-info hidden">
+        <div class="info-chips">
+          <span class="chip" id="chip-rows">— rows</span>
+          <span class="chip" id="chip-cols">— columns</span>
+          <span class="chip" id="chip-sport">—</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Column Browser -->
+  <section class="panel panel-columns hidden" id="panel-columns">
+    <div class="panel-header">
+      <h2>Column Browser</h2>
+      <div class="panel-actions">
+        <input type="text" id="col-search" class="form-control form-control-sm" placeholder="Search columns...">
+        <label class="toggle-label"><input type="checkbox" id="col-hide-ids" checked> Hide IDs</label>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="table-wrap">
+        <table class="data-grid" id="columns-table">
+          <thead>
+            <tr>
+              <th class="col-name">Column</th>
+              <th class="col-type">Type</th>
+              <th class="col-missing">Missing %</th>
+              <th class="col-unique">Unique</th>
+              <th class="col-stats">Stats</th>
+              <th class="col-samples">Samples</th>
+            </tr>
+          </thead>
+          <tbody id="columns-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Two-column layout: Target + Features | Model -->
+  <div class="grid-2col hidden" id="grid-config">
+    <!-- Target & Features Panel -->
+    <section class="panel panel-features">
+      <div class="panel-header">
+        <h2>Target & Features</h2>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <label for="target-select">Target Variable</label>
+          <select id="target-select" class="form-control">
+            <option value="">— Select target —</option>
+          </select>
+          <div class="target-suggestions" id="target-suggestions"></div>
+        </div>
+        <div class="form-row">
+          <label for="target-type">Target Type</label>
+          <select id="target-type" class="form-control">
+            <option value="binary_classification">Binary Classification</option>
+            <option value="multiclass_classification">Multiclass Classification</option>
+            <option value="regression">Regression</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="positive-class">Positive Class</label>
+          <input type="text" id="positive-class" class="form-control" placeholder="e.g. 1, True, 'Win'">
+        </div>
+
+        <h3 class="section-divider">Features</h3>
+        <div class="feature-actions">
+          <button class="btn btn-sm" id="btn-select-suggested">Select Suggested</button>
+          <button class="btn btn-sm" id="btn-select-all">Select All</button>
+          <button class="btn btn-sm" id="btn-deselect-all">Clear</button>
+        </div>
+        <div class="feature-list" id="feature-list"></div>
+      </div>
+    </section>
+
+    <!-- Model Panel -->
+    <section class="panel panel-model">
+      <div class="panel-header">
+        <h2>Model</h2>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <label for="model-type">Model Type</label>
+          <select id="model-type" class="form-control">
+            <option value="logistic_regression">Logistic Regression</option>
+            <option value="random_forest" selected>Random Forest</option>
+            <option value="gradient_boosting">Gradient Boosting</option>
+            <option value="extra_trees">Extra Trees</option>
+            <option value="xgboost">XGBoost</option>
+            <option value="lightgbm">LightGBM</option>
+            <option value="dummy_baseline">Dummy Baseline</option>
+          </select>
+        </div>
+
+        <div id="model-params" class="model-params"></div>
+
+        <h3 class="section-divider">Preprocessing</h3>
+        <div class="form-row form-row-inline">
+          <label>Imputation</label>
+          <select id="prep-imputation" class="form-control form-control-sm">
+            <option value="median">Median</option>
+            <option value="mean">Mean</option>
+            <option value="constant">Constant (0)</option>
+          </select>
+        </div>
+        <div class="form-row form-row-inline">
+          <label>Encoding</label>
+          <select id="prep-encoding" class="form-control form-control-sm">
+            <option value="one_hot">One-Hot</option>
+            <option value="ordinal">Ordinal</option>
+            <option value="frequency">Frequency</option>
+          </select>
+        </div>
+        <div class="form-row form-row-inline">
+          <label>Scaling</label>
+          <select id="prep-scaling" class="form-control form-control-sm">
+            <option value="standard">Standard</option>
+            <option value="robust">Robust</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+
+        <h3 class="section-divider">Validation</h3>
+        <div class="form-row form-row-inline">
+          <label>Method</label>
+          <select id="val-method" class="form-control form-control-sm">
+            <option value="walk_forward">Walk-Forward</option>
+            <option value="k_fold">K-Fold CV</option>
+            <option value="holdout">Holdout</option>
+          </select>
+        </div>
+        <div class="form-row form-row-inline">
+          <label>Train Window</label>
+          <input type="number" id="val-train-window" class="form-control form-control-sm" value="1000">
+        </div>
+        <div class="form-row form-row-inline">
+          <label>Test Window</label>
+          <input type="number" id="val-test-window" class="form-control form-control-sm" value="200">
+        </div>
+
+        <div class="train-section">
+          <button class="btn btn-primary btn-lg" id="btn-train" disabled>
+            <span class="btn-text">Train Model</span>
+            <span class="btn-spinner hidden"></span>
+          </button>
+          <div id="train-progress" class="progress-bar-container hidden">
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <span class="progress-text" id="progress-text">Initializing...</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Results Panel -->
+  <section class="panel panel-results hidden" id="panel-results">
+    <div class="panel-header">
+      <h2>Results</h2>
+      <div class="panel-actions">
+        <span class="model-id-badge" id="result-model-id"></span>
+        <span class="exec-time" id="result-exec-time"></span>
+      </div>
+    </div>
+    <div class="panel-body">
+      <!-- Metrics Cards -->
+      <div class="metrics-grid" id="metrics-grid"></div>
+
+      <!-- Feature Importance -->
+      <div class="chart-section" id="section-feature-importance">
+        <h3>Feature Importance</h3>
+        <div class="feature-bars" id="feature-bars"></div>
+      </div>
+
+      <!-- Calibration & Confusion Matrix -->
+      <div class="grid-2col">
+        <div class="chart-section">
+          <h3>Calibration Plot</h3>
+          <div class="chart-container" id="calibration-chart">
+            <canvas id="calibration-canvas" width="400" height="300"></canvas>
+          </div>
+        </div>
+        <div class="chart-section">
+          <h3>Confusion Matrix</h3>
+          <div class="confusion-matrix" id="confusion-matrix"></div>
+        </div>
+      </div>
+
+      <!-- Warnings -->
+      <div id="train-warnings" class="warnings hidden"></div>
+    </div>
+  </section>
+
+  <!-- Strategy Export Panel -->
+  <section class="panel panel-export hidden" id="panel-export">
+    <div class="panel-header">
+      <h2>Strategy Export</h2>
+    </div>
+    <div class="panel-body">
+      <div class="grid-3col">
+        <div class="form-row">
+          <label for="export-threshold">Probability Threshold</label>
+          <input type="number" id="export-threshold" class="form-control" value="0.55" min="0" max="1" step="0.01">
+        </div>
+        <div class="form-row">
+          <label for="export-edge">Minimum Edge</label>
+          <input type="number" id="export-edge" class="form-control" value="0.03" min="0" step="0.01">
+        </div>
+        <div class="form-row">
+          <label for="export-min-odds">Min Odds</label>
+          <input type="number" id="export-min-odds" class="form-control" value="1.2" min="1" step="0.1">
+        </div>
+        <div class="form-row">
+          <label for="export-max-odds">Max Odds</label>
+          <input type="number" id="export-max-odds" class="form-control" value="10.0" min="1" step="0.5">
+        </div>
+        <div class="form-row">
+          <label for="export-side">Market Side</label>
+          <select id="export-side" class="form-control">
+            <option value="back">Back</option>
+            <option value="lay">Lay</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="export-staking">Staking Method</label>
+          <select id="export-staking" class="form-control">
+            <option value="kelly">Kelly Criterion</option>
+            <option value="flat">Flat Stake</option>
+            <option value="proportional">Proportional</option>
+          </select>
+        </div>
+      </div>
+      <div class="export-actions">
+        <button class="btn btn-primary" id="btn-export-strategy" disabled>Export Strategy JSON</button>
+        <button class="btn" id="btn-backtest" disabled>Run Backtest</button>
+      </div>
+      <div id="export-preview" class="export-preview hidden">
+        <h4>Strategy Preview</h4>
+        <pre id="export-json"></pre>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Model History Panel -->
+<main class="dashboard hidden" id="history-panel">
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Model History</h2>
+      <button class="btn btn-sm" id="btn-refresh-history">Refresh</button>
+    </div>
+    <div class="panel-body">
+      <div class="table-wrap">
+        <table class="data-grid" id="history-table">
+          <thead>
+            <tr>
+              <th>Model ID</th>
+              <th>Type</th>
+              <th>Target</th>
+              <th>Features</th>
+              <th>Accuracy</th>
+              <th>AUC</th>
+              <th>Trained</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody"></tbody>
+        </table>
+      </div>
+      <p class="empty-state" id="history-empty">No models trained yet. Go to Builder to train your first model.</p>
+    </div>
+  </section>
+</main>
+
+<!-- Screenshots Section -->
+<section class="panel panel-screenshots" style="margin:2rem auto;max-width:1200px;padding:0 1rem;">
+  <div class="panel-header">
+    <h2>Screenshots</h2>
+  </div>
+  <div class="panel-body">
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:1rem">
+      Screenshots are generated automatically. Run the following command to capture them:
+    </p>
+    <pre style="background:var(--bg-secondary);padding:1rem;border-radius:6px;font-size:13px;overflow-x:auto;"><code>python apps/dashboard/screenshot.py</code></pre>
+    <div id="screenshot-gallery" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-top:1rem;">
+      <div class="screenshot-placeholder" style="background:var(--bg-secondary);border:2px dashed var(--border);border-radius:8px;padding:2rem;text-align:center;color:var(--text-muted);">
+        <p>Dashboard screenshot will appear here after running <code>screenshot.py</code></p>
+      </div>
+      <div class="screenshot-placeholder" style="background:var(--bg-secondary);border:2px dashed var(--border);border-radius:8px;padding:2rem;text-align:center;color:var(--text-muted);">
+        <p>Model Builder screenshot will appear here after running <code>screenshot.py</code></p>
+      </div>
+      <div class="screenshot-placeholder" style="background:var(--bg-secondary);border:2px dashed var(--border);border-radius:8px;padding:2rem;text-align:center;color:var(--text-muted);">
+        <p>Training Results screenshot will appear here after running <code>screenshot.py</code></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>

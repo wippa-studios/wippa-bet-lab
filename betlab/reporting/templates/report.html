@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BetLab Report — {{ experiment_id }}</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    line-height: 1.6;
+}
+.container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+h1 { color: #00d4aa; margin-bottom: 8px; font-size: 1.6em; }
+h2 { color: #58a6ff; margin: 24px 0 12px; font-size: 1.2em; border-bottom: 1px solid #30363d; padding-bottom: 6px; }
+.meta { color: #8b949e; font-size: 0.9em; margin-bottom: 24px; }
+.card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #21262d; }
+th { color: #8b949e; font-weight: 600; }
+td { color: #e6edf3; }
+.chart { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin-bottom: 16px; overflow-x: auto; }
+.warning { background: #2d1b00; border: 1px solid #9e6a03; border-radius: 8px; padding: 12px; margin-bottom: 16px; color: #f0c000; }
+.warning h2 { color: #f0c000; border-bottom-color: #9e6a03; }
+.kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.kpi-item { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 12px; text-align: center; }
+.kpi-value { font-size: 1.4em; font-weight: 700; color: #00d4aa; }
+.kpi-label { font-size: 0.8em; color: #8b949e; margin-top: 4px; }
+@media (max-width: 600px) {
+    .kpi { grid-template-columns: repeat(2, 1fr); }
+    .container { padding: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Wippa Bet Lab — Backtest Report</h1>
+<p class="meta">Experiment: <code>{{ experiment_id }}</code> | Generated: {{ generated_at }}Z</p>
+
+<h2>Executive Summary</h2>
+<div class="kpi">
+  <div class="kpi-item"><div class="kpi-value">{{ total_bets }}</div><div class="kpi-label">Total Bets</div></div>
+  <div class="kpi-item"><div class="kpi-value">{{ wins }}W / {{ losses }}L</div><div class="kpi-label">Wins / Losses</div></div>
+  <div class="kpi-item"><div class="kpi-value">${{ "%.2f"|format(net_profit) }}</div><div class="kpi-label">Net Profit</div></div>
+  <div class="kpi-item"><div class="kpi-value">{{ "%.2f"|format(roi * 100) }}%</div><div class="kpi-label">ROI</div></div>
+  <div class="kpi-item"><div class="kpi-value">{{ "%.2f"|format(yield_pct) }}%</div><div class="kpi-label">Yield</div></div>
+  <div class="kpi-item"><div class="kpi-value">{{ "%.2f"|format(max_drawdown * 100) }}%</div><div class="kpi-label">Max Drawdown</div></div>
+</div>
+
+<h2>Strategy</h2>
+<div class="card">
+<p><strong>Name:</strong> {{ strategy_name }} | <strong>Sport:</strong> {{ sport }} | <strong>Market:</strong> {{ market }}</p>
+</div>
+
+<h2>Configuration</h2>
+<div class="card">
+<p><strong>Starting Bankroll:</strong> ${{ "%.2f"|format(starting_bankroll) }} | <strong>Execution Time:</strong> {{ "%.1f"|format(execution_time_ms) }}ms</p>
+</div>
+
+<h2>Performance Metrics</h2>
+<div class="card">
+<table>
+<thead><tr><th>Metric</th><th>Value</th></tr></thead>
+<tbody>{{ perf_rows }}</tbody>
+</table>
+</div>
+
+<div class="chart">
+<h2>Cumulative P&L</h2>
+{{ pnl_svg }}
+</div>
+
+<div class="chart">
+<h2>Drawdown Curve</h2>
+{{ dd_svg }}
+</div>
+
+<h2>Risk Analysis</h2>
+<div class="card">
+<table>
+<thead><tr><th>Metric</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Max Drawdown</td><td>{{ "%.2f"|format(max_drawdown * 100) }}%</td></tr>
+<tr><td>Average Drawdown</td><td>{{ "%.2f"|format(avg_drawdown * 100) }}%</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>CLV Summary</h2>
+<div class="card">
+<table>
+<thead><tr><th>CLV Metric</th><th>Value</th></tr></thead>
+<tbody>{{ clv_rows }}</tbody>
+</table>
+</div>
+
+<h2>Calibration</h2>
+<div class="chart">
+{{ cal_svg }}
+</div>
+<div class="card">
+<table>
+<thead><tr><th>Calibration Metric</th><th>Value</th></tr></thead>
+<tbody>{{ cal_rows }}</tbody>
+</table>
+</div>
+
+{% if warning_html %}
+<div class="warning">
+<h2>Warnings</h2>
+{{ warning_html }}
+</div>
+{% endif %}
+</div>
+</body>
+</html>
